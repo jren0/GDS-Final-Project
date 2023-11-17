@@ -8,6 +8,33 @@ from sklearn.preprocessing import OrdinalEncoder
 
 
 """
+Get data with all features included
+"""
+def get_full_data():
+    train_df = pd.read_csv('train.csv')
+    test_df = pd.read_csv('test.csv')
+
+    s = (train_df.dtypes == 'object')
+    object_cols = list(s[s].index)
+
+    ordinal_encoder = OrdinalEncoder()
+    label_train_df = train_df.copy()
+    label_train_df[object_cols] = ordinal_encoder.fit_transform(train_df[object_cols])
+    label_train_df['energy_star_rating'] = label_train_df['energy_star_rating'].fillna(label_train_df['energy_star_rating'].mean())
+    label_train_df['direction_max_wind_speed'] = label_train_df['direction_max_wind_speed'].fillna(1.0)
+    label_train_df['direction_peak_wind_speed'] = label_train_df['direction_peak_wind_speed'].fillna(1.0)
+    label_train_df['max_wind_speed'] = label_train_df['max_wind_speed'].fillna(1.0)
+    label_train_df['days_with_fog'] = label_train_df['days_with_fog'].fillna(label_train_df['days_with_fog'].mean())
+    label_train_df = label_train_df.fillna(0)
+
+    y = label_train_df['site_eui'].values
+    X = label_train_df.drop(columns=['site_eui', 'id'])
+    X = X.values
+
+    return X, y
+
+
+"""
 Get train and test data with the average of some correlated variables
 """
 def get_data_avg_vars():
